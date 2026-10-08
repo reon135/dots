@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>dot完全ガイド｜ChatGPTの常時稼働エージェントを使いこなす</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F3F7;--surface:#FFFFFF;--surface2:#F6F7FB;--ink:#141A2E;--ink2:#4B5470;--line:#D9DEE8;
+  --dot:#3A57F2;--dot-soft:#E4E9FF;--gold:#8F7336;
+  --ok:#1D7F55;--ok-soft:#DDF3E8;--warn:#B45309;--warn-soft:#FDEBD0;--stop:#B42343;--stop-soft:#FBE0E6;
+  --shadow:0 1px 0 rgba(20,26,46,.04),0 28px 48px -30px rgba(20,26,46,.32);
+  --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1020;--surface:#171B31;--surface2:#1D2240;--ink:#EEF0FA;--ink2:#A6ADC8;--line:#2B3152;
+    --dot:#8499FF;--dot-soft:#232C5E;--gold:#D4B36A;
+    --ok:#5AD19C;--ok-soft:#14352A;--warn:#F2A65A;--warn-soft:#3A2813;--stop:#FF8AA3;--stop-soft:#3D1823;
+    --shadow:0 1px 0 rgba(255,255,255,.03),0 28px 48px -30px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1020;--surface:#171B31;--surface2:#1D2240;--ink:#EEF0FA;--ink2:#A6ADC8;--line:#2B3152;
+  --dot:#8499FF;--dot-soft:#232C5E;--gold:#D4B36A;
+  --ok:#5AD19C;--ok-soft:#14352A;--warn:#F2A65A;--warn-soft:#3A2813;--stop:#FF8AA3;--stop-soft:#3D1823;
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 28px 48px -30px rgba(0,0,0,.7);
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 68px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.9 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--dot)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--dot);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+section{padding-top:112px}
+h2{font:700 clamp(26px,4vw,38px)/1.5 var(--serif);margin:0 0 18px;letter-spacing:.01em}
+h3{font:700 20px/1.6 var(--serif);margin:0 0 8px}
+.lead{max-width:40em;color:var(--ink2);margin:0 0 44px}
+.mut{color:var(--ink2)}
+.sr{position:absolute;left:-9999px}
+
+.core{transform-box:fill-box;transform-origin:center;animation:breathe 4.2s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.halo{transform-box:fill-box;transform-origin:center;animation:halo 4.2s ease-in-out infinite}
+@keyframes halo{0%,100%{opacity:.75;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
+.ripple{transform-box:fill-box;transform-origin:center;animation:rip 3.8s ease-out infinite}
+@keyframes rip{0%{transform:scale(1);opacity:.5}100%{transform:scale(2);opacity:0}}
+.orb{transform-box:fill-box;transform-origin:center}
+.o1{animation:spin 14s linear infinite}.o2{animation:spin 21s linear infinite reverse}.o3{animation:spin 30s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:2px;height:54px;overflow-x:auto;scrollbar-width:none}
+.nav .wrap::-webkit-scrollbar{display:none}
+.nav b{font:700 18px var(--serif);margin-right:14px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.nav b i{width:12px;height:12px;border-radius:50%;background:var(--dot);display:inline-block}
+.nav a{white-space:nowrap;text-decoration:none;color:var(--ink2);font-size:14px;padding:6px 12px;border-radius:999px;transition:background .2s,color .2s}
+.nav a:hover,.nav a.on{background:var(--dot-soft);color:var(--dot)}
+
+/* hero */
+.hero{padding-top:56px}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:40px;align-items:center}
+.hero h1{font:700 clamp(34px,5.6vw,62px)/1.34 var(--serif);margin:0 0 24px;letter-spacing:.01em}
+.hero p.lead{margin-bottom:24px}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px;padding:0;list-style:none}
+.facts li{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 16px;font-size:14px;font-weight:500}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:700;font-size:15px;border:1px solid var(--ink);transition:transform .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.asof{font-size:13px;color:var(--ink2);max-width:36em;margin:0;line-height:1.8}
+.stage{position:relative}
+#heroStage{width:100%;height:auto;display:block;overflow:visible}
+.ln{stroke:var(--dot);stroke-opacity:.5;stroke-width:1.6;stroke-dasharray:4 7;fill:none;animation:flow 1.8s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-22}}
+.chip{animation:fadein .7s var(--d) both,bob 6s ease-in-out var(--d) infinite}
+.chip rect{fill:var(--surface);stroke:var(--line)}
+.chip text{fill:var(--ink);font:500 13px var(--sans)}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.hero-dot{transform-box:fill-box;transform-origin:center;animation:wake 1.5s cubic-bezier(.2,.9,.2,1) both,bob 7s ease-in-out 1.6s infinite}
+@keyframes wake{0%{transform:scale(.15);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+.eyes{transform-box:fill-box;transform-origin:center;animation:blink 5.2s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.pupil{transition:transform .45s ease}
+.feedcard{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.feedcard h4{margin:0 0 6px;font-size:13px;font-weight:700;color:var(--ink2)}
+#feed{list-style:none;margin:0;padding:0;min-height:156px}
+#feed li{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;font-size:13px;padding:6px 0;border-top:1px solid var(--line);line-height:1.5;animation:slidein .5s ease both}
+#feed li:first-child{border-top:0}
+#feed time{color:var(--ink2);font-variant-numeric:tabular-nums}
+#feed em{font-style:normal;font-size:11px;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.f-run em{background:var(--dot-soft);color:var(--dot)}
+.f-done em{background:var(--ok-soft);color:var(--ok)}
+.f-wait em{background:var(--warn-soft);color:var(--warn)}
+@keyframes slidein{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+/* what */
+.tl{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px 26px 20px;box-shadow:var(--shadow)}
+.tl-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#tlNow{font-weight:700;font-size:15px;min-height:28px}
+.pill-btn{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:7px 18px;font-size:14px;font-weight:500}
+.pill-btn:hover{border-color:var(--dot);color:var(--dot)}
+.tl-row{display:grid;grid-template-columns:116px 1fr;gap:16px;align-items:center;margin:12px 0}
+.tl-label{font-size:14px;font-weight:700}
+.tl-label small{display:block;font-weight:400;color:var(--ink2);font-size:12px;line-height:1.4}
+.tl-track{position:relative;height:46px;background:var(--surface2);border-radius:10px;overflow:hidden}
+.tl-track::after{content:"";position:absolute;top:0;bottom:0;left:var(--p,0%);width:2px;background:var(--dot);z-index:2}
+.tl-fill{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--p,0%)) 0 0)}
+.seg{position:absolute;top:5px;bottom:5px;border-radius:7px;font:500 12px/1 var(--sans);display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;font-style:normal;padding:0 4px}
+.s-ink{background:var(--ink);color:var(--bg)}
+.s-mute{background:repeating-linear-gradient(135deg,var(--line) 0 6px,transparent 6px 12px);color:var(--ink2)}
+.s-dot{background:var(--dot);color:#fff}
+.s-warn{background:var(--warn-soft);color:var(--warn);border:1px dashed var(--warn)}
+.s-ok{background:var(--ok-soft);color:var(--ok)}
+.s-flat{color:var(--ink2);justify-content:flex-start;padding-left:12px}
+.cmp{width:100%;border-collapse:collapse;margin-top:36px;font-size:15px}
+.cmp th,.cmp td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.7}
+.cmp th{font-weight:700;color:var(--ink2);font-size:13px}
+.cmp td:first-child{font-weight:700;width:22%}
+.cmp td:last-child{background:var(--dot-soft)}
+.cmp th:last-child{color:var(--dot)}
+.abil{display:grid;grid-template-columns:repeat(2,1fr);gap:0 48px;margin-top:56px}
+.abil div{border-left:2px solid var(--gold);padding:2px 0 2px 20px;margin-bottom:28px}
+.abil h3{font-size:18px}
+.abil p{margin:0;color:var(--ink2);font-size:15px}
+
+/* how */
+.diagram{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px;box-shadow:var(--shadow)}
+#arch{min-width:660px;width:100%;height:auto;display:block}
+.node{cursor:pointer}
+.node rect{fill:var(--surface2);stroke:var(--line);stroke-width:1.5;transition:all .25s}
+.node.opt rect{stroke-dasharray:6 5}
+.node text{pointer-events:none}
+.node .nt{font:700 16px var(--sans);fill:var(--ink)}
+.node .ns{font:400 12px var(--sans);fill:var(--ink2)}
+.node.on rect{fill:var(--dot-soft);stroke:var(--dot)}
+.node:hover rect{stroke:var(--dot)}
+.aline{stroke:var(--line);stroke-width:2;stroke-dasharray:5 7;animation:flow 2s linear infinite;fill:none;transition:stroke .25s}
+.aline.on{stroke:var(--dot);stroke-width:2.5}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 14px}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 16px;font-size:14px;font-weight:500}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 26px;min-height:150px}
+.panel h3{margin-bottom:6px}
+.panel p{margin:0 0 10px;color:var(--ink2);max-width:44em}
+.panel ul{margin:0;padding-left:1.2em;font-size:15px}
+.panel li{margin:2px 0}
+
+/* start */
+.start-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:36px;align-items:start}
+.steps{list-style:none;margin:0;padding:0;position:relative}
+.steps::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:2px;background:var(--line)}
+.steps li{position:relative}
+.steps button{display:grid;grid-template-columns:40px 1fr;gap:14px;text-align:left;width:100%;background:none;border:0;padding:12px 8px 12px 0;border-radius:12px}
+.steps .n{width:40px;height:40px;border-radius:50%;background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;font-weight:700;position:relative;z-index:1;transition:all .3s}
+.steps b{display:block;font-size:16px}
+.steps span.d{display:block;font-size:14px;color:var(--ink2);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .4s ease}
+.steps li.on .n{background:var(--dot);border-color:var(--dot);color:#fff}
+.steps li.on span.d{max-height:130px}
+.steps li.done .n{border-color:var(--dot);color:var(--dot)}
+.winwrap{position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px)}
+.win{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);font-size:13px;line-height:1.6}
+.win-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--line)}
+.win-bar i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.win-bar span{margin-left:10px;color:var(--ink2);font-size:12px}
+.win-body{display:grid;grid-template-columns:150px 1fr;height:380px}
+.win-side{background:var(--surface2);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.win-side div{padding:7px 10px;border-radius:8px;color:var(--ink2);display:flex;align-items:center;gap:8px;transition:all .3s}
+.win-side div.on{background:var(--dot-soft);color:var(--dot);font-weight:700}
+.win-side .sd{width:10px;height:10px;border-radius:50%;background:var(--dot);flex:none}
+#scene{padding:18px 22px;overflow:hidden;position:relative}
+#scene h4{margin:0 0 12px;font:700 15px var(--sans)}
+.btn-ui{background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:8px 18px;font-weight:700;font-size:13px}
+.hit{animation:hit .35s}
+@keyframes hit{50%{transform:scale(.93)}}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:6px}
+.empty-dot{width:70px;height:70px;border-radius:50%;border:2px dashed var(--line);margin-bottom:6px}
+.empty small{color:var(--ink2);font-size:11px}
+.s2{display:grid;grid-template-columns:130px 1fr;gap:20px;align-items:center}
+.s2 label{display:block;font-size:11px;color:var(--ink2);margin:8px 0 2px}
+.inp{border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-height:32px;display:flex;align-items:center;background:var(--surface2)}
+.caret{width:1px;height:14px;background:var(--ink);margin-left:1px;animation:cb 1s steps(2) infinite}
+@keyframes cb{50%{opacity:0}}
+.handle{margin:2px 0;color:var(--dot);font-size:12px;font-weight:700}
+.sw{display:flex;gap:8px}
+.sw button{width:22px;height:22px;border-radius:50%;border:2px solid transparent;padding:0}
+.sw button.on{border-color:var(--ink)}
+.tgl{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:2px 0;margin-bottom:10px}
+.tgl i{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;transition:background .25s}
+.tgl i::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s}
+.tgl.on i{background:var(--dot)}
+.tgl.on i::after{transform:translateX(14px)}
+.app{display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.app .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-weight:700;color:#fff;font-size:13px}
+.app small{display:block;color:var(--ink2);font-size:11px;line-height:1.4}
+.rule{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.seg3{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg3 button{background:none;border:0;padding:4px 10px;font-size:11px;color:var(--ink2);white-space:nowrap}
+.seg3 button+button{border-left:1px solid var(--line)}
+.seg3 button.on[data-v="auto"]{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.seg3 button.on[data-v="ask"]{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.seg3 button.on[data-v="block"]{background:var(--stop-soft);color:var(--stop);font-weight:700}
+.chat{display:flex;flex-direction:column;gap:8px;height:150px;overflow:hidden}
+.bub{max-width:88%;padding:8px 12px;border-radius:12px;animation:slidein .4s both}
+.bub.me{align-self:flex-end;background:var(--ink);color:var(--bg)}
+.bub.ai{background:var(--surface2);border:1px solid var(--line)}
+.comp{position:absolute;left:22px;right:22px;bottom:18px;display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 12px;background:var(--surface)}
+.comp-txt{flex:1;min-height:42px;font-size:12px;color:var(--ink)}
+.send{width:30px;height:30px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-weight:700}
+.act{position:absolute;top:18px;right:22px;width:160px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);animation:slidein .5s both;font-size:11px}
+.act b{display:block;font-size:11px;color:var(--ink2);margin-bottom:4px}
+.act div{padding:3px 0;border-top:1px solid var(--line)}
+.act div:first-of-type{border-top:0}
+.cursor{position:absolute;left:0;top:0;width:22px;height:22px;pointer-events:none;z-index:9;transition:transform .8s cubic-bezier(.4,.1,.2,1);filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.cursor.press{animation:hit .3s}
+.win-ctl{display:flex;align-items:center;gap:10px;margin-top:14px}
+.win-ctl button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 16px;font-size:13px}
+.prog{flex:1;display:flex;gap:6px}
+.prog i{flex:1;height:4px;border-radius:2px;background:var(--line);overflow:hidden;position:relative}
+.prog i.on::after{content:"";position:absolute;inset:0;background:var(--dot);transform-origin:left;animation:fillp var(--t,7s) linear both}
+.prog i.done{background:var(--dot)}
+@keyframes fillp{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.note{font-size:12px;color:var(--ink2);margin:10px 0 0}
+
+/* who */
+.who-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:start}
+.plans{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14px}
+.plans th,.plans td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);line-height:1.6}
+.plans tr:last-child td{border-bottom:0}
+.plans th{background:var(--surface2);font-size:12px;color:var(--ink2)}
+.tag{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;font-weight:700;white-space:nowrap}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.no{background:var(--stop-soft);color:var(--stop)}
+.check{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow)}
+.check h3{margin-bottom:12px}
+.check .grp{margin-bottom:14px}
+.check .grp>span{display:block;font-size:12px;color:var(--ink2);margin-bottom:6px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:5px 14px;font-size:13px}
+.opt[aria-pressed="true"]{background:var(--dot);border-color:var(--dot);color:#fff}
+.result{border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.75;transition:background .3s;min-height:110px}
+.result.ok{background:var(--ok-soft)}.result.warn{background:var(--warn-soft)}.result.no{background:var(--stop-soft)}
+.result b{display:block;font-size:16px;margin-bottom:2px}
+
+/* price */
+.prices{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.pc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 20px;display:flex;flex-direction:column}
+.pc.big{border-color:var(--gold);box-shadow:var(--shadow)}
+.pc h3{font:700 15px var(--sans);color:var(--ink2);margin:0}
+.pc .amt{font:700 38px/1.3 var(--serif);margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.pc .amt small{font:400 13px var(--sans);color:var(--ink2)}
+.pc p{font-size:13px;margin:8px 0 0;color:var(--ink2);line-height:1.75}
+.meter{margin-top:48px;display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;align-items:center}
+.gauge{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:var(--shadow)}
+.bar{height:22px;border-radius:11px;background:var(--surface2);overflow:hidden;border:1px solid var(--line);margin:14px 0 8px}
+.bar i{display:block;height:100%;width:3%;background:var(--ok);border-radius:11px;transition:width 1.4s cubic-bezier(.3,.8,.3,1),background .4s}
+.bar i.hot{background:var(--warn)}
+.gtxt{font-weight:700;min-height:28px}
+.gnote{font-size:12px;color:var(--ink2);margin:8px 0 0}
+
+/* safe */
+.gate-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:28px}
+.gctl{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px}
+.gctl .grp{margin-bottom:14px}
+.gctl .grp>span{display:block;font-size:12px;color:var(--ink2);margin-bottom:6px}
+.gview{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:var(--shadow)}
+.g-track{position:relative;height:130px;margin:6px 0 4px}
+.g-node{position:absolute;top:30px;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;text-align:center;font-size:12px;font-weight:700;line-height:1.3;transition:all .3s}
+.g-dot{left:0;background:var(--dot);color:#fff}
+.g-gate{left:50%;transform:translateX(-50%);border-radius:14px;width:26px;height:110px;top:10px;background:var(--surface2);border:2px solid var(--line);color:transparent}
+.g-gate.ask{border-color:var(--warn);background:var(--warn-soft)}
+.g-gate.block{border-color:var(--stop);background:var(--stop-soft)}
+.g-gate.auto{border-color:var(--ok);background:var(--ok-soft)}
+.g-dest{right:0;background:var(--surface2);border:2px dashed var(--line);color:var(--ink2)}
+.g-dest.ok{background:var(--ok-soft);border:2px solid var(--ok);color:var(--ok)}
+.g-line{position:absolute;left:76px;right:76px;top:66px;height:2px;background:repeating-linear-gradient(90deg,var(--line) 0 6px,transparent 6px 12px)}
+.packet{position:absolute;top:56px;left:14%;width:20px;height:20px;border-radius:50%;background:var(--gold);transform:translateX(-50%);transition:left .9s cubic-bezier(.4,.1,.2,1),opacity .4s;z-index:3}
+.gmsg{min-height:84px;border-radius:12px;background:var(--surface2);padding:14px 16px;font-size:14px;line-height:1.75}
+.gmsg b{display:block}
+.gbtns{display:flex;gap:8px;margin-top:10px}
+.gbtns button{border:0;border-radius:8px;padding:6px 16px;font-weight:700;font-size:13px}
+.gbtns .y{background:var(--ok);color:#fff}.gbtns .n{background:var(--stop-soft);color:var(--stop)}
+.go{margin-top:10px}
+.safelist{display:grid;grid-template-columns:repeat(2,1fr);gap:0 48px;margin-top:48px}
+.safelist div{border-left:2px solid var(--gold);padding:2px 0 2px 20px;margin-bottom:24px}
+.safelist h3{font-size:17px}
+.safelist p{margin:0;color:var(--ink2);font-size:15px}
+
+/* use */
+.flow{display:flex;align-items:center;gap:0;margin:18px 0 22px}
+.fn{flex:1;text-align:center;padding:12px 6px;border:1px solid var(--line);background:var(--surface);border-radius:12px;font-size:13px;font-weight:700;transition:all .35s;line-height:1.5}
+.fn.me{border-style:dashed}
+.fn.on{background:var(--dot);border-color:var(--dot);color:#fff;transform:translateY(-4px)}
+.fn.me.on{background:var(--warn);border-color:var(--warn)}
+.fa{width:28px;height:2px;background:var(--line);flex:none}
+.use-cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.use-cols h4{margin:0 0 6px;font-size:15px}
+.use-cols ul{margin:0;padding-left:1.1em;font-size:15px}
+.use-cols li{margin:3px 0}
+.prompt{margin-top:22px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative}
+.prompt pre{margin:0;white-space:pre-wrap;font:400 14px/1.8 var(--sans)}
+.prompt button{position:absolute;top:10px;right:10px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 14px;font-size:12px}
+.prompt small{display:block;color:var(--ink2);font-size:12px;margin-bottom:6px}
+.caution{margin-top:28px;background:var(--warn-soft);border-radius:12px;padding:16px 20px;font-size:14px;color:var(--ink)}
+
+/* limits & faq */
+.lim{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 36px;margin:0;padding:0;list-style:none}
+.lim li{padding:12px 0 12px 32px;border-bottom:1px solid var(--line);position:relative;font-size:15px}
+.lim li::before{content:"";position:absolute;left:4px;top:21px;width:10px;height:10px;border-radius:50%;border:2px solid var(--gold)}
+details{border-bottom:1px solid var(--line);padding:4px 0}
+summary{cursor:pointer;list-style:none;padding:16px 36px 16px 0;font-weight:700;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";position:absolute;right:6px;top:50%;width:10px;height:10px;border-right:2px solid var(--ink2);border-bottom:2px solid var(--ink2);transform:translateY(-70%) rotate(45deg);transition:transform .3s}
+details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+details p{margin:0 0 18px;color:var(--ink2);max-width:42em;font-size:15px}
+.src{font-size:13px;color:var(--ink2);line-height:1.9}
+.src ul{padding-left:1.2em;margin:6px 0 16px}
+footer{padding:80px 0 56px}
+
+@media (max-width:900px){
+  .hero-grid,.start-grid,.who-grid,.meter,.gate-grid,.use-cols{grid-template-columns:1fr}
+  .prices{grid-template-columns:repeat(2,1fr)}
+  .abil,.safelist,.lim{grid-template-columns:1fr}
+  .winwrap{position:static}
+  section{padding-top:84px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px}
+  .tl-row{grid-template-columns:1fr;gap:6px}
+  .win-body{grid-template-columns:1fr;height:400px}
+  .win-side{display:none}
+  .prices{grid-template-columns:1fr}
+  .flow{flex-direction:column;gap:0}.fa{width:2px;height:14px}
+  .fn{width:100%}
+  .act{display:none}
+  .cmp{font-size:13px}.cmp th,.cmp td{padding:10px 8px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="ページ内メニュー">
+  <div class="wrap">
+    <b><i></i>dotガイド</b>
+    <a href="#what">dotとは</a><a href="#how">仕組み</a><a href="#start">はじめ方</a><a href="#who">利用条件</a><a href="#price">料金と上限</a><a href="#safe">安全設計</a><a href="#use">集客・販売での活用</a><a href="#faq">FAQ</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>画面を閉じても、仕事を進めてくれるChatGPT</h1>
+      <p class="lead">OpenAIが2026年9月29日に発表した「dots」。専用のコンピューターを持ち、アプリを使いこなし、判断が必要なときだけ声をかけてくる常時稼働のエージェント。仕組み、始め方、利用条件、料金、安全面、SNS集客とコンテンツ販売での使いどころまで、動く図と操作画面で整理。</p>
+      <ul class="facts"><li>GPT-6 Astra搭載</li><li>専用クラウドPCとブラウザ</li><li>4,000以上のアプリ連携</li></ul>
+      <div class="cta"><a class="btn" href="#start">操作画面を見る</a><a class="btn ghost" href="#who">自分が使えるか確認</a></div>
+      <p class="asof">2026年10月7日時点の公開情報をもとに作成。料金や提供範囲は変わりやすいため、契約前に必ずOpenAI公式ページで最終確認を。</p>
+    </div>
+    <div class="stage">
+      <svg id="heroStage" viewBox="0 0 520 470" role="img" aria-label="dotを中心に、Gmail、Slack、Notion、カレンダーなどのアプリがつながる図"></svg>
+      <div class="feedcard" aria-live="off">
+        <h4>dotの活動エリア（動作イメージ）</h4>
+        <ul id="feed"></ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ============ dotとは ============ -->
+<section id="what"><div class="wrap">
+  <h2>dotは「質問に答える」から「責任を持って進める」へ</h2>
+  <p class="lead">通常のチャットは、会話が終われば作業も止まる。dotは目標を預かり、専用のクラウドコンピューターで作業を続け、判断が必要な場面でだけ連絡。「再生」で時間の流れを比較。</p>
+
+  <div class="tl" id="tl">
+    <div class="tl-top"><div id="tlNow" aria-live="polite">再生で比較をスタート</div><button class="pill-btn" id="tlPlay">もう一度再生</button></div>
+    <div class="tl-row"><div class="tl-label">あなたの画面</div><div class="tl-track"><div class="tl-fill">
+      <i class="seg s-ink" style="left:0;width:28%">開いている</i>
+      <i class="seg s-mute" style="left:28%;width:24%">閉じている</i>
+      <i class="seg s-ink" style="left:52%;width:10%">スマホで承認</i>
+      <i class="seg s-mute" style="left:62%;width:38%">閉じている</i>
+    </div></div></div>
+    <div class="tl-row"><div class="tl-label">通常のチャット</div><div class="tl-track"><div class="tl-fill">
+      <i class="seg s-ink" style="left:4%;width:20%">回答を生成</i>
+      <i class="seg s-flat" style="left:24%;width:76%">会話が終わると、作業も止まる</i>
+    </div></div></div>
+    <div class="tl-row"><div class="tl-label">dot<small>専用クラウドPCで稼働</small></div><div class="tl-track"><div class="tl-fill">
+      <i class="seg s-dot" style="left:4%;width:24%">目標を受け取り調査</i>
+      <i class="seg s-dot" style="left:28%;width:24%">下書きを作成</i>
+      <i class="seg s-warn" style="left:52%;width:10%">確認待ち</i>
+      <i class="seg s-dot" style="left:62%;width:24%">承認後に実行</i>
+      <i class="seg s-ok" style="left:86%;width:14%">報告</i>
+    </div></div></div>
+  </div>
+
+  <table class="cmp">
+    <thead><tr><th>比べるポイント</th><th>通常のチャット</th><th>dot</th></tr></thead>
+    <tbody>
+      <tr><td>作業が続く時間</td><td>会話しているあいだ</td><td>会話が終わっても継続</td></tr>
+      <tr><td>作業の場所</td><td>ChatGPTの画面内</td><td>専用のクラウドPCとブラウザ</td></tr>
+      <tr><td>連絡の手段</td><td>ChatGPT</td><td>ChatGPT、Slack、Teams、音声</td></tr>
+      <tr><td>記憶</td><td>会話とメモリ</td><td>ChatGPTのメモリに加え、dot自身のメモ</td></tr>
+      <tr><td>判断が必要なとき</td><td>自分から続きを聞く</td><td>dotから確認が届く</td></tr>
+    </tbody>
+  </table>
+
+  <div class="abil">
+    <div><h3>続ける</h3><p>アプリを閉じても動き、複数のプロジェクトを並行して管理。新しい依頼も、スレッドを分けずに追加。</p></div>
+    <div><h3>使う</h3><p>接続したアプリ、専用ブラウザ、専用クラウドPCを操作。レストランの予約から、複数ツールをまたぐ作業まで。</p></div>
+    <div><h3>覚える</h3><p>ChatGPTのメモリと、dot自身のメモを活用。フィードバックを受けて、好みや「良い成果」の基準を学習。</p></div>
+    <div><h3>先回りする</h3><p>待機中は、許可された接続先を読み取り専用でリサーチし、メモを保存。依頼される前に下準備。</p></div>
+  </div>
+</div></section>
+
+<!-- ============ 仕組み ============ -->
+<section id="how"><div class="wrap">
+  <h2>dotを支える6つの部品</h2>
+  <p class="lead">図の部品をクリックすると、役割と注意点を表示。スマホでは、下のボタンからも切り替え可能。</p>
+  <div class="diagram"><svg id="arch" viewBox="0 0 760 480" role="img" aria-label="dotの構成図"></svg></div>
+  <div class="tabs" id="archTabs" role="tablist"></div>
+  <div class="panel" id="archPanel" aria-live="polite"></div>
+</div></section>
+
+<!-- ============ はじめ方 ============ -->
+<section id="start"><div class="wrap">
+  <h2>はじめ方を、操作画面の動きで確認</h2>
+  <p class="lead">最初のdotを作るまでの流れを、カーソルが動くイメージ画面で再現。ステップをクリックすると、その場面から再生。</p>
+  <div class="start-grid">
+    <ol class="steps" id="steps"></ol>
+    <div class="winwrap">
+      <div class="win" id="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>ChatGPT デスクトップ（イメージ画面）</span></div>
+        <div class="win-body">
+          <aside class="win-side" id="side">
+            <div>＋ 新しいチャット</div><div>検索</div><div>ライブラリ</div><div id="sideDot"><span class="sd"></span>dot</div><div>Work</div>
+          </aside>
+          <div id="scene"></div>
+        </div>
+        <svg class="cursor" id="cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2l15 9-7 1.8L9 20z" fill="#141A2E" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="win-ctl"><button id="prev" aria-label="前のステップ">前へ</button><button id="pp" aria-label="再生と一時停止">一時停止</button><button id="next" aria-label="次のステップ">次へ</button><div class="prog" id="prog"></div></div>
+      <p class="note">イメージ画面です。実際のボタン名や配置は異なる場合があります。アプリ名は例。</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ 利用条件 ============ -->
+<section id="who"><div class="wrap">
+  <h2>誰が使える？ プランと地域で判定</h2>
+  <p class="lead">対象は有料の上位プランが中心。無料プラン、Go、Plusは現時点で対象外。右のチェッカーで、プランと地域を選ぶと結果を表示。</p>
+  <div class="who-grid">
+    <div>
+      <table class="plans">
+        <thead><tr><th>プラン</th><th>dotの利用</th><th>補足</th></tr></thead>
+        <tbody>
+          <tr><td>Free / Go / Plus</td><td><span class="tag no">対象外</span></td><td>拡大は「近日」とされるが、プランと時期は未発表</td></tr>
+          <tr><td>Pro（100 / 200 / 500）</td><td><span class="tag ok">利用可</span></td><td>EEA、スイス、英国を除く市場で段階的に展開</td></tr>
+          <tr><td>Business Premium</td><td><span class="tag ok">利用可</span></td><td>対応する全地域で提供</td></tr>
+          <tr><td>Enterprise / Edu / Healthcare</td><td><span class="tag warn">ベータ</span></td><td>管理者が有効化したワークスペースのみ</td></tr>
+        </tbody>
+      </table>
+      <p class="note">共通条件は18歳以上。個人で作成できるのはデスクトップアプリかPCのWebブラウザ。</p>
+    </div>
+    <div class="check">
+      <h3>あなたは使える？</h3>
+      <div class="grp"><span>プラン</span><div class="opts" id="optPlan"></div></div>
+      <div class="grp"><span>地域</span><div class="opts" id="optRegion"></div></div>
+      <div class="result" id="result"></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ 料金と上限 ============ -->
+<section id="price"><div class="wrap">
+  <h2>料金と利用上限</h2>
+  <p class="lead">dot単体の料金はなく、最初の1体は対象プランに含まれる。入口はProの月額100ドル。追加のdot、速度の向上、月間容量の拡張は今後の提供予定で、価格は未発表。</p>
+  <div class="prices">
+    <div class="pc"><h3>Pro 100</h3><div class="amt">$<span class="num" data-to="100">100</span><small>／月</small></div><p>最初のdotを含む入口のプラン。</p></div>
+    <div class="pc"><h3>Pro 200</h3><div class="amt">$<span class="num" data-to="200">200</span><small>／月</small></div><p>Pro 100より大きな利用枠。新規契約分の枠は以前より縮小されたと報じられている。</p></div>
+    <div class="pc big"><h3>Pro 500</h3><div class="amt">$<span class="num" data-to="500">500</span><small>／月</small></div><p>最大の利用枠。より高速な上位モデルの枠も付くと報じられている。</p></div>
+    <div class="pc"><h3>Business Premium</h3><div class="amt">$<span class="num" data-to="125">125</span><small>／ユーザー・月</small></div><p>年払いなら月あたり100ドル。全対応地域で利用可。</p></div>
+  </div>
+  <p class="note">金額は米ドル。Enterpriseは個別見積もり。為替や税で日本円の支払額は変動。</p>
+
+  <div class="meter">
+    <div>
+      <h3>何が「利用上限」に数えられる？</h3>
+      <p class="mut" style="margin:0 0 12px">ボタンを切り替えて、ゲージの動きを比較。ゲージは考え方のイメージで、実際の数値ではない。</p>
+      <div class="opts"><button class="opt" id="m1" aria-pressed="true">dotとチャットする</button><button class="opt" id="m2" aria-pressed="false">dotがWork・Codexのタスクを始める</button></div>
+    </div>
+    <div class="gauge">
+      <div class="gtxt" id="gtxt">dotとの会話は、上限に数えられない</div>
+      <div class="bar"><i id="gbar"></i></div>
+      <p class="gnote" id="gnote">会話そのものは、ChatGPTの利用上限の対象外。</p>
+      <p class="gnote">ローンチ後の最初の1か月は、拡張された利用枠が付く。公式ヘルプの表現は更新されているため、最新の記載を確認。</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ 安全設計 ============ -->
+<section id="safe"><div class="wrap">
+  <h2>任せすぎない。ルールで「門」をつくる</h2>
+  <p class="lead">dotの操作には「自動で行う」「確認してから行う」「ブロック」の3段階のルールを設定可能。下の実験で、操作ごとに挙動を確認。</p>
+  <div class="gate-grid">
+    <div class="gctl">
+      <div class="grp"><span>dotにやらせる操作</span><div class="opts" id="gAct"></div></div>
+      <div class="grp"><span>ルール</span><div class="opts" id="gRule"></div></div>
+      <button class="btn go" id="gGo" style="border:0">実行させてみる</button>
+    </div>
+    <div class="gview">
+      <div class="g-track" id="gTrack">
+        <div class="g-line"></div>
+        <div class="g-node g-dot">dot</div>
+        <div class="g-node g-gate" id="gGate">門</div>
+        <div class="g-node g-dest" id="gDest">実行先</div>
+        <div class="packet" id="gPacket"></div>
+      </div>
+      <div class="gmsg" id="gMsg"><b>操作とルールを選んで「実行させてみる」</b>門の色で、通るか止まるかが分かる。</div>
+    </div>
+  </div>
+  <div class="safelist">
+    <div><h3>作業場所の分離</h3><p>dotの専用クラウドPCは、初期設定で手元のPCから分離。手元のPCへのアクセスは初期状態でオフ。</p></div>
+    <div><h3>手元のPC接続は任意</h3><p>接続できるのは同時に1台。接続中はPCがオンで、ChatGPTアプリが開いている必要あり。ローカル操作はデスクトップ版26.929以降が条件。</p></div>
+    <div><h3>待機中は読み取り専用</h3><p>先回りのリサーチは読み取り専用のツールだけ。メッセージ送信、アプリ内容の変更、PC操作は勝手に行わない。</p></div>
+    <div><h3>自動レビューと停止</h3><p>実行前に、指示、権限、ルール、組み込みの安全要件と照合。懸念を検知すると、一時停止や停止が入る場合も。</p></div>
+    <div><h3>ミスは起こりうる</h3><p>OpenAI自身が、dotの誤りの可能性を明記。重要な成果物は、人の目で最終確認を。</p></div>
+    <div><h3>接続は最小限に</h3><p>Webやメールの文面に紛れた指示で誤作動するリスクは、完全に解消されたとは言えない。必要なアプリだけを接続し、活動を定期的に確認。</p></div>
+  </div>
+</div></section>
+
+<!-- ============ 活用 ============ -->
+<section id="use"><div class="wrap">
+  <h2>コンテンツ販売とSNS集客での使いどころ</h2>
+  <p class="lead">dotの得意分野は、調べて、整えて、下書きにして、人の確認に回す流れ。以下は公式の紹介例ではなく、公開されている機能から組み立てた活用アイデア。接続できるアプリで、実現の範囲が変わる点に注意。</p>
+  <div class="tabs" id="useTabs" role="tablist"></div>
+  <div class="flow" id="flow"></div>
+  <div class="use-cols" id="useCols"></div>
+  <div class="prompt"><small>dotへの依頼文の例（コピーして調整）</small><pre id="prompt"></pre><button id="copy">コピー</button></div>
+  <div class="caution">SNSの投稿やLINEの配信は、確認ルールを入れてから運用。自動投稿や自動配信の可否はプラットフォームごとの規約で異なるため、事前に確認を。個人情報や顧客データを渡す範囲も、最小限に。</div>
+</div></section>
+
+<!-- ============ 制限 + FAQ ============ -->
+<section id="faq"><div class="wrap">
+  <h2>現時点の制限</h2>
+  <ul class="lim">
+    <li>18歳以上のみ利用可</li>
+    <li>dotの作成はデスクトップアプリかPCブラウザ。モバイルからは作成不可</li>
+    <li>作成後は、モバイルアプリから会話可能。モバイルブラウザは非対応</li>
+    <li>dotから電話をかけてくることはない。通話は自分から開始</li>
+    <li>dot専用のメールアドレスはなし</li>
+    <li>接続できる個人PCは1台</li>
+    <li>SMSでのやり取りは、米国のProユーザー限定のベータ</li>
+    <li>最初は1ユーザー1体。複数dotのチーム運用は今後</li>
+  </ul>
+
+  <h2 style="margin-top:96px">よくある質問</h2>
+  <details><summary>無料で使える？</summary><p>無料プランでは使えない。入口はPro 100の月額100ドル。dot自体に別料金はなく、最初の1体は対象プランに含まれる。</p></details>
+  <details><summary>Plusでは使えない？</summary><p>現時点では対象外。OpenAIは対象ユーザーの拡大を「近日」としているが、プランと時期は未発表。</p></details>
+  <details><summary>日本で使える？</summary><p>Proの除外地域はEEA、スイス、英国で、日本は含まれていない。ただし段階的な展開のため、作成メニューが表示されるまで数日かかる場合も。表示されない場合は、プラン、年齢、デスクトップ環境を確認。</p></details>
+  <details><summary>スマホだけで始められる？</summary><p>最初のdotは、デスクトップアプリかPCのWebブラウザでの作成が必要。作成後は、モバイルアプリから会話できる。</p></details>
+  <details><summary>dotと話すと、利用上限は減る？</summary><p>dotとの会話は、ChatGPTの利用上限に数えられない。一方、dotが始めるWorkやCodexのタスクは、通常どおり上限に数えられる。</p></details>
+  <details><summary>勝手にSNSへ投稿される？</summary><p>ルール次第。投稿や送信を「確認してから実行」に設定すれば、承認するまで動かない。最初は、公開系の操作をすべて確認にするのが無難。</p></details>
+  <details><summary>通常のChatGPTやWork、Codexとの違いは？</summary><p>通常のチャットは会話が終われば止まるが、dotは会話の合間も作業を進める。dotは、WorkやCodexのタスクを始めたり管理したりする上位の存在という位置づけ。</p></details>
+  <details><summary>複数のdotを持てる？</summary><p>現在は1体。追加のdotは今後の提供予定で、価格と時期は未発表。</p></details>
+
+  <footer><div class="src">
+    <b>参照した主な情報</b>
+    <ul>
+      <li>OpenAI公式（X）：<a href="https://x.com/OpenAI/status/2104984508454121795" target="_blank" rel="noopener">dots発表の投稿</a></li>
+      <li>OpenAIヘルプセンター：<a href="https://help.openai.com/en/articles/20001554-manage-dots-in-chatgpt-workspaces" target="_blank" rel="noopener">Manage dots in ChatGPT workspaces</a></li>
+      <li>報道・解説：<a href="https://betanews.com/article/openai-dots-agents-chatgpt/" target="_blank" rel="noopener">BetaNews</a>、<a href="https://www.tomsguide.com/ai/openai-gave-chatgpt-a-virtual-computer-to-run-errands-for-you" target="_blank" rel="noopener">Tom's Guide</a>、<a href="https://www.datacamp.com/blog/openai-dots" target="_blank" rel="noopener">DataCamp</a>、<a href="https://www.eesel.ai/blog/openai-dots-pricing" target="_blank" rel="noopener">eesel</a>、<a href="https://kingy.ai/blog/openai-dots-guide/" target="_blank" rel="noopener">kingy.ai</a>、<a href="https://smartscope.blog/en/blog/openai-dots-regional-availability-2026/" target="_blank" rel="noopener">SmartScope</a>、<a href="https://note.com/miomuroi/n/ned90245b2be0" target="_blank" rel="noopener">note（Muroi Mio）</a></li>
+    </ul>
+    価格、利用枠、提供地域は更新が早い項目。Pro各プランの価格やBusiness Premiumの料金は、ヘルプ記事を参照した二次情報にもとづく。最新の条件は、OpenAIの料金ページとヘルプセンターで確認を。活用アイデアは、公開情報から組み立てた編集上の提案。
+  </div></footer>
+</div></section>
+</main>
+
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const COLORS=['#3A57F2','#7B4DFF','#0FA3A3','#F0644B','#3B4256'];
+const mix=(hex,t)=>{const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=v=>Math.round(v+(255-v)*t);return `rgb(${f(r)},${f(g)},${f(b)})`};
+let uid=0;
+function dotG(c,ring=true){
+  const id='g'+(++uid),c1=mix(c,.55),c2=mix(c,.9);
+  const rings=ring?[[-18,88,28,'o1'],[62,80,24,'o2'],[112,92,34,'o3']].map(([a,rx,ry,cl])=>`<g class="orb ${cl}"><g transform="rotate(${a} 100 100)"><ellipse cx="100" cy="100" rx="${rx}" ry="${ry}" fill="none" stroke="url(#${id}r)" stroke-width="1.6"/><circle cx="${100+rx}" cy="100" r="4" fill="#fff" stroke="${c}" stroke-width="2"/><circle cx="${100-rx}" cy="100" r="4" fill="#fff" stroke="${c}" stroke-width="2" opacity=".45"/></g></g>`).join(''):'';
+  return `<defs>
+   <radialGradient id="${id}" cx="36%" cy="30%" r="78%"><stop offset="0" stop-color="#fff"/><stop offset=".28" stop-color="${c2}"/><stop offset=".62" stop-color="${c1}"/><stop offset="1" stop-color="${c}"/></radialGradient>
+   <radialGradient id="${id}h"><stop offset="0" stop-color="${c}" stop-opacity=".5"/><stop offset=".55" stop-color="${c}" stop-opacity=".16"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>
+   <linearGradient id="${id}r" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${c}" stop-opacity=".1"/><stop offset=".5" stop-color="${c}" stop-opacity=".95"/><stop offset="1" stop-color="${c}" stop-opacity=".1"/></linearGradient>
+  </defs>
+  <circle class="halo" cx="100" cy="100" r="98" fill="url(#${id}h)"/>
+  <circle class="ripple" cx="100" cy="100" r="54" fill="none" stroke="${c}" stroke-width="1.5"/>
+  <circle class="ripple" cx="100" cy="100" r="54" fill="none" stroke="${c}" stroke-width="1.5" style="animation-delay:1.9s"/>
+  ${rings}
+  <g class="core"><circle cx="100" cy="100" r="52" fill="url(#${id})"/><ellipse cx="84" cy="80" rx="18" ry="9" fill="#fff" opacity=".4" transform="rotate(-32 84 80)"/></g>`;
+}
+const dotSVG=(c,ring)=>`<svg viewBox="0 0 200 200" role="img" aria-label="dotのイメージ" style="overflow:visible">${dotG(c,ring)}</svg>`;
+
+/* look-around */
+
+/* hero */
+(()=>{
+  const chips=[['Gmail',95,100],['Slack',425,90],['Notion',430,340],['カレンダー',90,350],['ほか4,000以上',260,432]];
+  $('#heroStage').innerHTML=
+   `<g>${chips.map(([n,x,y],i)=>`<path class="ln" d="M260 230L${x} ${y}" style="animation-delay:${i*.15}s"/>`).join('')}</g>`+
+   chips.map(([n,x,y],i)=>`<g transform="translate(${x-66} ${y-20})"><g class="chip" style="--d:${(1+i*.25).toFixed(2)}s"><rect width="132" height="40" rx="20"/><text x="66" y="25" text-anchor="middle">${n}</text></g></g>`).join('')+
+   `<g transform="translate(140 110) scale(1.2)"><g class="hero-dot">${dotG(COLORS[0],true)}</g></g>`;
+  const items=[
+    ['07:30','競合アカウントの新着投稿を確認','読み取り','run'],
+    ['07:42','要点をNotionの下書きに整理','作成','done'],
+    ['08:05','note記事の構成案を作成','作成','done'],
+    ['08:20','LINE配信文を送ってよいか確認','承認待ち','wait'],
+    ['09:00','昨日の反応データを集計','読み取り','done'],
+    ['09:15','来週の投稿テーマ案を保存','作成','done']
+  ];
+  const feed=$('#feed');let i=0;
+  const push=()=>{const [t,x,s,k]=items[i++%items.length];const li=document.createElement('li');li.className='f-'+k;li.innerHTML=`<time>${t}</time><span>${x}</span><em>${s}</em>`;feed.prepend(li);while(feed.children.length>4)feed.lastChild.remove()};
+  push();push();push();
+  if(!reduce) setInterval(push,2800);
+})();
+
+/* nav highlight */
+(()=>{
+  const links=$$('.nav a');
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-40% 0px -55% 0px'});
+  $$('main section').forEach(s=>io.observe(s));
+})();
+
+/* timeline */
+(()=>{
+  const tl=$('#tl'),now=$('#tlNow');let run=0;
+  const msg=[[.04,'あなたが、dotに目標を伝える'],[.28,'画面を閉じても、dotは調査と下書きを継続'],[.52,'判断が必要。dotが承認をリクエスト'],[.62,'承認後、dotが続きを実行'],[.86,'戻ったときには、成果が届いている']];
+  async function play(){
+    const my=++run;
+    if(reduce){tl.style.setProperty('--p','100%');now.textContent='戻ったときには、成果が届いている';return}
+    const dur=9500,t0=performance.now();
+    await new Promise(res=>{
+      const f=t=>{ if(my!==run)return res(); const p=Math.min(1,(t-t0)/dur); tl.style.setProperty('--p',(p*100)+'%');
+        let m=msg[0][1]; msg.forEach(([th,tx])=>{if(p>=th)m=tx}); now.textContent=m;
+        p<1?requestAnimationFrame(f):res() };
+      requestAnimationFrame(f);
+    });
+  }
+  $('#tlPlay').onclick=play;
+  const io=new IntersectionObserver(es=>{if(es[0].isIntersecting){play();io.disconnect()}},{threshold:.5});io.observe(tl);
+})();
+
+/* architecture */
+(()=>{
+  const N=[
+   {k:'cloud',t:'専用クラウドPC',s:'dotだけの作業場',x:130,y:110,d:'dotごとに、クラウド上の専用コンピューターが用意される。手元のPCとは分かれた環境で動くため、自分のPCを閉じていても作業が進む。',p:['初期設定では手元のPCから分離','作業中の様子は、あとから画面で確認可']},
+   {k:'browser',t:'専用ブラウザ',s:'Webを自分で操作',x:130,y:210,d:'dot専用のブラウザで、Webサイトの閲覧や調べものを実行。人がブラウザを開く代わりに、dotが画面を操作。',p:['作業中のdotのPC画面は確認可','購入など影響の大きい操作は確認の対象']},
+   {k:'rules',t:'ルールと承認',s:'自動・確認・ブロック',x:130,y:310,d:'操作ごとに「自動で行う」「確認してから行う」「ブロック」を設定。カスタムルールは、組み込みの安全要件を上書きできない。',p:['設定の目安は、設定、パーソナライズ、カスタムルール','保存済みカードでの購入は、確認が入る']},
+   {k:'memory',t:'記憶',s:'好みと進行状況',x:380,y:60,d:'ChatGPTのメモリと、dot自身のメモを持つ。やり取りやフィードバックから、仕事の進め方や「良い成果」の基準を学習。',p:['メモはチャネルをまたいで引き継がれる','待機中のリサーチ結果も、メモとして保存']},
+   {k:'apps',t:'4,000以上のアプリ',s:'プラグインで接続',x:630,y:110,d:'ChatGPTのプラグインを通じて、メール、カレンダー、チャット、ドキュメントなどに接続。どのアプリを使わせるかは、自分で選ぶ。',p:['有効にしただけで全アプリに触れるわけではない','各サービス側の認可も、操作の範囲を制限']},
+   {k:'pc',t:'あなたのPC（任意）',s:'初期設定はオフ',x:630,y:240,opt:true,d:'接続すると、手元のファイルやアプリ、コードにも触れられる。使うときだけ、許可して接続。',p:['接続できるのは同時に1台','PCがオンで、ChatGPTアプリを開いておく必要あり','デスクトップ版26.929以降が条件']},
+   {k:'channels',t:'連絡の窓口',s:'ChatGPT・Slack・Teams・音声',x:380,y:420,d:'ChatGPT（デスクトップ、Web、モバイル）、Slack、Microsoft Teamsからメッセージを送れる。ChatGPTでは通話も可能。どの窓口でも、文脈は引き継がれる。',p:['dotから電話がかかることはない','SMSは米国Proの限定ベータ']}
+  ];
+  const svg=$('#arch');
+  const lines=N.map(n=>`<path class="aline" data-k="${n.k}" d="M380 240L${n.x} ${n.y}"/>`).join('');
+  const nodes=N.map(n=>`<g class="node${n.opt?' opt':''}" data-k="${n.k}" tabindex="0" role="button" aria-label="${n.t}"><rect x="${n.x-88}" y="${n.y-30}" width="176" height="60" rx="14"/><text class="nt" x="${n.x}" y="${n.y-2}" text-anchor="middle">${n.t}</text><text class="ns" x="${n.x}" y="${n.y+17}" text-anchor="middle">${n.s}</text></g>`).join('');
+  svg.innerHTML=lines+nodes+`<g transform="translate(275 135) scale(1.05)"><g class="hero-dot">${dotG(COLORS[0],true)}</g></g>`;
+  const tabs=$('#archTabs'),panel=$('#archPanel');
+  tabs.innerHTML=N.map(n=>`<button class="tab" role="tab" data-k="${n.k}" aria-selected="false">${n.t}</button>`).join('');
+  let auto=true,idx=0;
+  function sel(k){
+    const n=N.find(x=>x.k===k);
+    $$('.node',svg).forEach(e=>e.classList.toggle('on',e.dataset.k===k));
+    $$('.aline',svg).forEach(e=>e.classList.toggle('on',e.dataset.k===k));
+    $$('.tab',tabs).forEach(e=>e.setAttribute('aria-selected',e.dataset.k===k));
+    panel.innerHTML=`<h3>${n.t}</h3><p>${n.d}</p><ul>${n.p.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  }
+  const user=k=>{auto=false;sel(k)};
+  $$('.node',svg).forEach(e=>{e.onclick=()=>user(e.dataset.k);e.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();user(e.dataset.k)}}});
+  $$('.tab',tabs).forEach(e=>e.onclick=()=>user(e.dataset.k));
+  sel(N[0].k);
+  if(!reduce) setInterval(()=>{if(auto){idx=(idx+1)%N.length;sel(N[idx].k)}},4200);
+})();
+
+/* start: mock operation */
+(()=>{
+  const STEPS=[
+   ['デスクトップで開く','ChatGPTのデスクトップアプリ（Windows版を含む）か、PCのWebブラウザを開く。モバイルでは作成できない。'],
+   ['名前と見た目を決める','名前がそのままハンドルになる（例 @名前-dot）。見た目も好みに合わせて変更可。画面は一例。'],
+   ['アプリを接続する','使わせたいアプリだけを選ぶ。以前に接続したアカウントも、権限の範囲で使える状態の場合があるため、一覧を確認。'],
+   ['ルールを決める','自動・確認・ブロックの3段階。メッセージ送信や公開は「確認」から始めるのが安心。購入は常に確認が入る。'],
+   ['目標を任せる','ゴール、参照する材料、成果物の形、確認が必要な操作を書く。ChatGPT、Slack、Teams、音声から指示可能。']
+  ];
+  const ol=$('#steps'),scene=$('#scene'),win=$('#win'),cur=$('#cursor'),prog=$('#prog');
+  ol.innerHTML=STEPS.map((s,i)=>`<li data-i="${i}"><button><span class="n">${i+1}</span><span><b>${s[0]}</b><span class="d">${s[1]}</span></span></button></li>`).join('');
+  prog.innerHTML=STEPS.map(()=>'<i></i>').join('');
+  let token=0,idx=0,playing=true,visible=false,started=false;
+  const w=async(ms,my)=>{await sleep(ms);return my===token};
+  async function moveTo(el,my){
+    const a=win.getBoundingClientRect(),b=el.getBoundingClientRect();
+    cur.style.transform=`translate(${b.left-a.left+b.width*.55}px,${b.top-a.top+b.height*.5}px)`;
+    return w(reduce?60:900,my);
+  }
+  async function click(el,my,fn){
+    if(!await moveTo(el,my))return false;
+    cur.classList.add('press');el.classList.add('hit');
+    if(fn)fn();
+    await sleep(reduce?30:300);cur.classList.remove('press');el.classList.remove('hit');
+    return my===token;
+  }
+  async function type(el,text,my,ms,cb){
+    let s='';for(const ch of text){s+=ch;el.textContent=s;if(cb)cb(s);if(!await w(reduce?5:ms,my))return false}
+    return true;
+  }
+  const scenes=[
+   {t:6500,html:`<div class="empty"><div class="empty-dot"></div><h4>まだdotがいません</h4><p class="mut" style="margin:0">最初の1体をつくりましょう</p><button class="btn-ui" id="a1">dotを作成</button><small>デスクトップアプリ・PCブラウザから作成</small></div>`,
+    async run(my){
+      if(!await w(500,my))return;
+      if(!await click($('#sideDot'),my,()=>$('#sideDot').classList.add('on')))return;
+      if(!await w(500,my))return;
+      await click($('#a1'),my,()=>$('#a1').textContent='作成中…');
+    }},
+   {t:9000,html:`<h4>dotに名前と見た目を決める</h4><div class="s2"><div id="pv"></div><div><label>名前</label><div class="inp"><span id="tx"></span><b class="caret"></b></div><div class="handle" id="hd">@…-dot</div><label>色</label><div class="sw" id="sw">${COLORS.map((c,i)=>`<button data-c="${c}" class="${i?'':'on'}" style="background:${c}" aria-label="色${i+1}"></button>`).join('')}</div><label>光のリング</label><button class="tgl" id="gl"><i></i>リングをつける</button><br><button class="btn-ui" id="ok2">決定</button></div></div>`,
+    async run(my){
+      let col=COLORS[0],gl=false;const pv=$('#pv');
+      const draw=()=>pv.innerHTML=dotSVG(col,gl);draw();
+      if(!await w(600,my))return;
+      if(!await type($('#tx'),'mydot',my,170,s=>$('#hd').textContent='@'+s+'-dot'))return;
+      const sw=$$('#sw button')[1];
+      if(!await click(sw,my,()=>{$$('#sw button').forEach(b=>b.classList.remove('on'));sw.classList.add('on');col=COLORS[1];draw()}))return;
+      if(!await click($('#gl'),my,()=>{$('#gl').classList.add('on');gl=true;draw()}))return;
+      await click($('#ok2'),my);
+    }},
+   {t:8500,html:`<h4>使わせるアプリを選ぶ</h4>${[['Gmail','#D14836','メールの読み取り・下書き'],['Notion','#141A2E','ページの作成・更新'],['Slack','#4A154B','チャットの閲覧・投稿'],['Googleドライブ','#1A8F4C','ファイルの閲覧・作成'],['カレンダー','#2F6BFF','予定の確認']].map(([n,c,d])=>`<div class="app"><div class="ic" style="background:${c}">${n[0]}</div><div>${n}<small>${d}</small></div><button class="tgl" aria-label="${n}を接続"><i></i></button></div>`).join('')}<p class="note" id="n3">必要なものだけを接続</p>`,
+    async run(my){
+      const t=$$('.app .tgl');let c=0;
+      if(!await w(500,my))return;
+      for(const i of [1,3,2]){
+        if(!await click(t[i],my,()=>{t[i].classList.add('on');c++;$('#n3').textContent=c+'件を接続中。必要なものだけでOK'}))return;
+      }
+    }},
+   {t:9000,html:`<h4>操作ごとのルールを決める</h4>${[['情報を読む','auto'],['ファイル・下書きを作る','auto'],['メッセージを送る','auto'],['SNSなどに公開する','auto'],['購入・支払いをする','ask']].map(([n,v],i)=>`<div class="rule"><span>${n}${i===4?'<small class="mut"> 常に確認</small>':''}</span><div class="seg3" data-r="${i}"><button data-v="auto" class="${v==='auto'?'on':''}">自動</button><button data-v="ask" class="${v==='ask'?'on':''}">確認</button><button data-v="block">ブロック</button></div></div>`).join('')}<p class="note">設定の目安は、設定、パーソナライズ、カスタムルール</p>`,
+    async run(my){
+      if(!await w(500,my))return;
+      for(const r of [2,3]){
+        const g=$(`.seg3[data-r="${r}"]`),b=$('[data-v="ask"]',g);
+        if(!await click(b,my,()=>{$$('button',g).forEach(x=>x.classList.remove('on'));b.classList.add('on')}))return;
+      }
+    }},
+   {t:11000,html:`<div class="chat" id="chat"></div><div class="act" id="act" hidden><b>アクティビティ</b><div>予定　毎朝のリサーチ</div><div>進行中　保存先の準備</div><div>完了　ルールの確認</div></div><div class="comp"><div class="comp-txt" id="ct"></div><button class="send" id="sd" aria-label="送信">↑</button></div>`,
+    async run(my){
+      const text='毎朝、気になる発信者の新着を調べて、要点をNotionにまとめてください。外部への送信は、先に確認をお願いします。';
+      if(!await w(500,my))return;
+      if(!await type($('#ct'),text,my,38))return;
+      if(!await click($('#sd'),my,()=>{$('#chat').innerHTML=`<div class="bub me">${text}</div>`;$('#ct').textContent=''}))return;
+      if(!await w(700,my))return;
+      const ai=document.createElement('div');ai.className='bub ai';$('#chat').appendChild(ai);
+      if(!await type(ai,'了解です。明日の朝から開始。要点はNotionに保存し、送信が必要なときは先に確認を送ります。',my,32))return;
+      $('#act').hidden=false;
+    }}
+  ];
+  function setUI(){
+    $$('li',ol).forEach((li,i)=>{li.classList.toggle('on',i===idx);li.classList.toggle('done',i<idx)});
+    $$('i',prog).forEach((p,i)=>{p.classList.remove('on','done');p.style.removeProperty('--t');if(i<idx)p.classList.add('done');if(i===idx){void p.offsetWidth;p.style.setProperty('--t',scenes[i].t+'ms');if(playing&&!reduce)p.classList.add('on');else p.classList.add('done')}});
+    $('#pp').textContent=playing?'一時停止':'再生';
+  }
+  async function go(i){
+    const my=++token;idx=(i+scenes.length)%scenes.length;
+    scene.innerHTML=scenes[idx].html;$$('#side div').forEach(d=>d.classList.remove('on'));
+    cur.style.transform='translate(220px,330px)';
+    setUI();
+    await scenes[idx].run(my);
+    if(my!==token)return;
+    const rest=Math.max(0,scenes[idx].t-5000);
+    await sleep(reduce?1200:rest+1200);
+    if(my!==token)return;
+    if(playing&&visible)go(idx+1);
+    else if(playing){const iv=setInterval(()=>{if(my!==token){clearInterval(iv)}else if(visible){clearInterval(iv);go(idx+1)}},600)}
+  }
+  $$('li',ol).forEach(li=>li.querySelector('button').onclick=()=>go(+li.dataset.i));
+  $('#prev').onclick=()=>go(idx-1);$('#next').onclick=()=>go(idx+1);
+  $('#pp').onclick=()=>{playing=!playing;if(playing){go(idx)}else{setUI()}};
+  new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible&&!started){started=true;go(0)}},{threshold:.35}).observe(win);
+  setUI();
+})();
+
+/* who checker */
+(()=>{
+  const P=[['free','Free・Go・Plus'],['pro','Pro'],['bp','Business Premium'],['ent','Enterprise系']];
+  const R=[['jp','日本'],['eu','EEA・スイス・英国'],['ot','それ以外']];
+  let plan='pro',reg='jp';
+  const mk=(el,arr,get,set)=>{el.innerHTML=arr.map(([k,t])=>`<button class="opt" data-k="${k}" aria-pressed="${get()===k}">${t}</button>`).join('');$$('.opt',el).forEach(b=>b.onclick=()=>{set(b.dataset.k);draw()})};
+  function draw(){
+    mk($('#optPlan'),P,()=>plan,v=>plan=v);mk($('#optRegion'),R,()=>reg,v=>reg=v);
+    let c,t,d;
+    if(plan==='free'){c='no';t='現時点では対象外';d='Free、Go、Plusにdotは含まれない。入口はPro 100（月額100ドル）。拡大の時期は未発表。'}
+    else if(plan==='pro'&&reg==='eu'){c='no';t='Proでは対象外の地域';d='ProのdotはEEA、スイス、英国を除く市場で展開中。Business Premiumは全対応地域で提供。'}
+    else if(plan==='pro'){c='ok';t='利用できる見込み';d=(reg==='jp'?'日本は除外地域に含まれていない。ただし段階的な展開のため、作成メニューが出るまで数日かかる場合も。':'段階的に展開中のため、メニューの表示まで数日かかる場合も。')+'18歳以上で、デスクトップから作成。'}
+    else if(plan==='bp'){c='ok';t='利用できる';d='Business Premiumは全対応地域で提供。最初のdotは席に含まれる。18歳以上が条件。'}
+    else{c='warn';t='管理者が有効化すれば利用可（ベータ）';d='Enterprise、Edu、Healthcareは、ワークスペースの管理者がdotsを有効化。Slack連携やローカルPC接続は、別の権限として設定。'}
+    const r=$('#result');r.className='result '+c;r.innerHTML=`<b>${t}</b>${d}`;
+  }
+  draw();
+})();
+
+/* price count-up + meter */
+(()=>{
+  const nums=$$('.num');
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting)return;io.unobserve(e.target);
+    const to=+e.target.dataset.to;if(reduce){e.target.textContent=to;return}
+    const t0=performance.now();const f=t=>{const p=Math.min(1,(t-t0)/1300);e.target.textContent=Math.round(to*(1-Math.pow(1-p,3)));p<1&&requestAnimationFrame(f)};requestAnimationFrame(f);
+  }),{threshold:.6});nums.forEach(n=>{n.textContent='0';io.observe(n)});
+  const m1=$('#m1'),m2=$('#m2'),bar=$('#gbar');
+  function set(a){
+    m1.setAttribute('aria-pressed',a===1);m2.setAttribute('aria-pressed',a===2);
+    if(a===1){bar.style.width='3%';bar.classList.remove('hot');$('#gtxt').textContent='dotとの会話は、上限に数えられない';$('#gnote').textContent='会話そのものは、ChatGPTの利用上限の対象外。'}
+    else{bar.style.width='52%';bar.classList.add('hot');$('#gtxt').textContent='dotが始めた作業は、通常どおり数えられる';$('#gnote').textContent='dotがWork・Codexで進めるタスクは、プランの利用上限を消費。'}
+  }
+  m1.onclick=()=>set(1);m2.onclick=()=>set(2);set(1);
+})();
+
+/* gate sandbox */
+(()=>{
+  const A=[['read','情報を読む','読み取りを実行'],['draft','下書きを作る','下書きが保存された'],['send','メッセージを送る','宛先に送信された'],['post','SNSに投稿する','投稿が公開された'],['buy','購入・支払いをする','決済が実行された']];
+  const Rr=[['auto','自動で行う'],['ask','確認してから'],['block','ブロック']];
+  let act='send',rule='ask',busy=false,tk=0;
+  const $a=$('#gAct'),$r=$('#gRule'),pk=$('#gPacket'),gate=$('#gGate'),dest=$('#gDest'),msg=$('#gMsg');
+  const mk=(el,arr,get,set)=>{el.innerHTML=arr.map(([k,t])=>`<button class="opt" data-k="${k}" aria-pressed="${get()===k}">${t}</button>`).join('');$$('.opt',el).forEach(b=>b.onclick=()=>{set(b.dataset.k);reset();draw()})};
+  const draw=()=>{mk($a,A,()=>act,v=>act=v);mk($r,Rr,()=>rule,v=>rule=v)};
+  function reset(){tk++;busy=false;pk.style.transition='none';pk.style.left='14%';pk.style.opacity='1';void pk.offsetWidth;pk.style.transition='';gate.className='g-node g-gate';dest.className='g-node g-dest';dest.textContent='実行先';msg.innerHTML='<b>操作とルールを選んで「実行させてみる」</b>門の色で、通るか止まるかが分かる。'}
+  async function pass(my,label){pk.style.left='86%';await sleep(1000);if(my!==tk)return;dest.className='g-node g-dest ok';dest.textContent='完了';msg.innerHTML=`<b>${label}</b>ルールどおりに実行された。`}
+  $('#gGo').onclick=async()=>{
+    if(busy)return;reset();busy=true;const my=tk;
+    let eff=rule,extra='';
+    if(act==='buy'&&rule==='auto'){eff='ask';extra='購入は、自動に設定しても確認が入る。'}
+    const lab=A.find(a=>a[0]===act)[2];
+    pk.style.left='46%';await sleep(950);if(my!==tk)return;
+    gate.classList.add(eff);
+    if(eff==='auto'){msg.innerHTML='<b>門が開いた</b>確認なしで実行へ進む。';await sleep(500);if(my!==tk)return;await pass(my,lab);busy=false}
+    else if(eff==='block'){msg.innerHTML='<b>ブロック</b>この操作は実行されず、dotは手前で止まる。';await sleep(500);if(my!==tk)return;pk.style.left='14%';pk.style.opacity='.35';busy=false}
+    else{
+      msg.innerHTML=`<b>承認待ち</b>${extra}あなたが承認するまで、dotは門の前で待機。<div class="gbtns"><button class="y" id="gy">承認する</button><button class="n" id="gn">却下する</button></div>`;
+      $('#gy').onclick=async()=>{msg.innerHTML='<b>承認された</b>実行へ進む。';gate.className='g-node g-gate auto';await sleep(400);if(my!==tk)return;await pass(my,lab);busy=false};
+      $('#gn').onclick=()=>{pk.style.left='14%';pk.style.opacity='.35';msg.innerHTML='<b>却下した</b>実行されず、dotは手元に戻る。';busy=false};
+    }
+  };
+  draw();reset();
+})();
+
+/* use cases */
+(()=>{
+  const U=[
+   {k:'sns',t:'Threads・SNS運用',flow:['反応データを集計','投稿案を下書き','あなたが確認','投稿'],
+    dot:['気になる発信者と自分の投稿の反応を調べ、共通点を整理','テーマ候補と投稿案を、ドキュメントに下書きとして保存','毎週の振り返りを、決まった時間にまとめて報告'],
+    me:['投稿するかどうかと、言い回しの最終決定','公開操作を「確認」にしておく','各プラットフォームの規約の確認'],
+    p:'毎週月曜の朝に、先週のSNS投稿の反応を集計し、伸びた投稿の共通点を整理してください。来週の投稿テーマ案を7つ、Notionの「投稿案」に下書きとして保存してください。公開や送信は行わず、保存までにしてください。'},
+   {k:'note',t:'note・有料記事',flow:['読者の悩みを調査','構成と下書き','あなたが仕上げ','公開'],
+    dot:['テーマごとに、読者の悩みの言い回しと競合記事を調査','見出し案、構成案、導入文の下書きを作成','過去記事ごとの閲覧データを、週次で整理'],
+    me:['体験や事例など、自分にしか書けない中身の追加','価格、特典、販売ページの最終判断','公開の操作'],
+    p:'次の記事テーマ「◯◯」について、読者の悩みの言い回しを集め、構成案を作ってください。見出し候補を3案、導入文の下書きを1本、Googleドライブの「note下書き」フォルダに保存してください。公開はしないでください。'},
+   {k:'line',t:'LINE・販売導線',flow:['問い合わせを分類','返信を下書き','あなたが確認','送信'],
+    dot:['届いた問い合わせを分類し、よくある質問への返信を下書き','ステップ配信の文面と件名の候補を作成','申込や入金の確認表を更新'],
+    me:['送信前の確認。送信は必ず承認制に','個人情報の扱いと、表示義務のある記載の確認','返金や例外対応の判断'],
+    p:'届いた問い合わせメールを毎朝分類し、よくある質問には返信の下書きを作成してください。送信はせず、下書き保存までにしてください。個人情報は、要約に含めないでください。'},
+   {k:'rep',t:'週次レポート',flow:['数値を読み取り','前週比を整理','あなたが確認','共有'],
+    dot:['スプレッドシートの売上と流入データを読み取り','前週比と気づきを、1ページに整理','数字の根拠になったセルも併記'],
+    me:['数字の意味づけと、次週の打ち手の決定','共有先の確認','集計ルールの定期的な見直し'],
+    p:'毎週金曜に、スプレッドシートの売上と流入データを読み取り、前週比と気づきを1ページにまとめて報告してください。数字の根拠となったセルも併記してください。'}
+  ];
+  const tabs=$('#useTabs'),flow=$('#flow'),cols=$('#useCols'),pr=$('#prompt');
+  let cur=0,hl=0,timer;
+  tabs.innerHTML=U.map((u,i)=>`<button class="tab" role="tab" aria-selected="${i===0}" data-i="${i}">${u.t}</button>`).join('');
+  function show(i){
+    cur=i;const u=U[i];
+    $$('.tab',tabs).forEach((b,j)=>b.setAttribute('aria-selected',j===i));
+    flow.innerHTML=u.flow.map((t,j)=>`<div class="fn${j===2?' me':''}" data-j="${j}">${t}</div>${j<3?'<div class="fa"></div>':''}`).join('');
+    cols.innerHTML=`<div><h4>dotに任せる</h4><ul>${u.dot.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><h4>あなたが決める</h4><ul>${u.me.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+    pr.textContent=u.p;hl=0;tick();
+  }
+  function tick(){$$('.fn',flow).forEach((f,j)=>f.classList.toggle('on',j===hl))}
+  clearInterval(timer);
+  timer=setInterval(()=>{if(reduce)return;hl=(hl+1)%4;tick()},1500);
+  $$('.tab',tabs).forEach(b=>b.onclick=()=>show(+b.dataset.i));
+  $('#copy').onclick=async()=>{
+    const txt=U[cur].p,b=$('#copy');
+    try{await navigator.clipboard.writeText(txt)}catch(e){const r=document.createRange();r.selectNodeContents(pr);const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy')}catch(_){}}
+    b.textContent='コピーしました';setTimeout(()=>b.textContent='コピー',1600);
+  };
+  show(0);
+})();
+})();
+</script>
+</body>
+</html>
